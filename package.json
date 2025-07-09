@@ -51,7 +51,8 @@
       "electron.js",
       "preload.js",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "codegen_training/model/**/*"
     ],
     "directories": {
       "buildResources": "build"

@@ -9,6 +9,47 @@ function VSCodeLayout() {
   const [files, setFiles] = useState(FileHandler.listFiles());
   const [activeTab, setActiveTab] = useState(files[0] || '');
   const [code, setCode] = useState(activeTab ? FileHandler.loadFile(activeTab) : '');
+  const [showPalette, setShowPalette] = useState(false);
+  const [showRiley, setShowRiley] = useState(true); // Assuming Riley is visible by default
+  const [showTerminal, setShowTerminal] = useState(true); // Assuming terminal is visible by default
+
+  // Command Palette Handler
+  function handleCommand(commandAction) {
+    console.log('Command executed:', commandAction);
+    switch (commandAction) {
+      case 'newFile':
+        newFile();
+        break;
+      case 'saveFile':
+        saveFile();
+        break;
+      case 'deleteFile':
+        // For delete, we need a way to specify which file.
+        // This might require enhancing the command palette or context.
+        // For now, let's prompt or delete active.
+        if (activeTab) deleteFile(activeTab);
+        else alert('No active file to delete.');
+        break;
+      case 'search':
+        alert('Search in Files: Not yet implemented.');
+        break;
+      case 'settings':
+        alert('Open Settings: Not yet implemented.');
+        break;
+      case 'toggleTerminal':
+        setShowTerminal(prev => !prev);
+        break;
+      case 'showRiley':
+        setShowRiley(prev => !prev);
+        break;
+      case 'about':
+        alert('Zelgodiz Studio: Offline AI IDE by Zelgodiz Industries.');
+        break;
+      default:
+        console.warn('Unknown command:', commandAction);
+    }
+    setShowPalette(false); // Close palette after command
+  }
 
   // Open file in editor
   function openFile(name) {
@@ -49,20 +90,51 @@ function VSCodeLayout() {
   }
 
   React.useEffect(() => {
-    // Terminal setup
-    const term = new Terminal();
-    term.open(document.getElementById('xterm-container'));
-    term.write('Welcome to Zelgodiz Studio\r\n');
-    return () => term.dispose();
-  }, []);
+    // Command Palette Shortcut
+    const handleGlobalKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'P') {
+        event.preventDefault();
+        setShowPalette(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+
+    // Terminal Setup Effect
+    React.useEffect(() => {
+      let term;
+      if (showTerminal) {
+        const container = document.getElementById('xterm-container');
+        if (container) {
+          term = new Terminal();
+          term.open(container);
+          term.write('Welcome to Zelgodiz Studio\r\n');
+        }
+      }
+      return () => {
+        if (term) {
+          term.dispose();
+        }
+      };
+    }, [showTerminal]); // Re-run when showTerminal changes
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, []); // Main effect for global keydown, runs once
 
   return (
     <>
-      <CommandPalette />
+      <CommandPalette show={showPalette} onCommand={handleCommand} onClose={() => setShowPalette(false)} />
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#1e1e1e' }}>
       {/* Top bar */}
-      <div style={{ height: 32, background: '#222', color: '#fff', display: 'flex', alignItems: 'center', paddingLeft: 12 }}>
-        Zelgodiz Studio — VS Code Style
+      <div style={{ height: 32, background: '#222', color: '#fff', display: 'flex', alignItems: 'center', paddingLeft: 12, justifyContent: 'space-between' }}>
+        <span>Zelgodiz Studio — VS Code Style</span>
+        <button
+          onClick={() => setShowPalette(true)}
+          style={{ background: '#0af', color: '#fff', border: 'none', borderRadius: 3, padding: '2px 12px', cursor: 'pointer', marginRight: '10px' }}
+        >
+          Commands (Ctrl+Shift+P)
+        </button>
       </div>
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
         {/* Sidebar */}
@@ -79,9 +151,11 @@ function VSCodeLayout() {
               </div>
             ))}
           </div>
-          <div style={{ borderTop: '1px solid #333', padding: 10 }}>
-            <RileyPanel />
-          </div>
+          {showRiley && (
+            <div style={{ borderTop: '1px solid #333', padding: 10, minHeight: '200px' /* Ensure Riley panel has some space */ }}>
+              <RileyPanel />
+            </div>
+          )}
         </div>
         {/* Main area */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -109,9 +183,11 @@ function VSCodeLayout() {
             )}
           </div>
           {/* Terminal */}
-          <div style={{ height: 180, background: '#181818', borderTop: '1px solid #333' }}>
-            <div id="xterm-container" style={{ width: '100%', height: '100%' }} />
-          </div>
+          {showTerminal && (
+            <div style={{ height: 180, background: '#181818', borderTop: '1px solid #333' }}>
+              <div id="xterm-container" style={{ width: '100%', height: '100%' }} />
+            </div>
+          )}
           {/* Status bar */}
           <div style={{ height: 24, background: '#222', color: '#fff', display: 'flex', alignItems: 'center', paddingLeft: 12 }}>
             Status: Ready
