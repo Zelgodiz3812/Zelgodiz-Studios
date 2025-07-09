@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+path/to/largefile
+node_modules/
+codegen_training/model/
+dist/
