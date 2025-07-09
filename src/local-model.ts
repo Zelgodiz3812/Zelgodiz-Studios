@@ -20,12 +20,8 @@ export class LocalModel {
   }
 
   async loadModel() {
-    // Download or load a small open-source code model (e.g., Phi-2, TinyLlama)
-    // For demo: use a small model from HuggingFace (offline cache recommended)
-    this.generator = await pipeline('text-generation', 'Xenova/phi-2', {
-      // modelPath: path.resolve(__dirname, '../../tools/ai_models/phi-2'),
-      // Uncomment above and download model for full offline use
-    });
+    // Load the locally trained model from codegen_training/model
+    this.generator = await pipeline('text-generation', path.resolve(__dirname, '../codegen_training/model'));
   }
 
   async generateCode(prompt: string, maxTokens = 128): Promise<string> {

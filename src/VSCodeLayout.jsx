@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import FileHandler from './fileHandler.js';
 import MonacoEditor from '@monaco-editor/react';
@@ -7,7 +5,7 @@ import { Terminal } from 'xterm';
 import RileyPanel from './RileyPanel.jsx';
 import CommandPalette from './CommandPalette.jsx';
 
-
+function VSCodeLayout() {
   const [files, setFiles] = useState(FileHandler.listFiles());
   const [activeTab, setActiveTab] = useState(files[0] || '');
   const [code, setCode] = useState(activeTab ? FileHandler.loadFile(activeTab) : '');
@@ -124,3 +122,5 @@ import CommandPalette from './CommandPalette.jsx';
     </>
   );
 }
+
+export default VSCodeLayout;
