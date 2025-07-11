@@ -8,7 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dist": "electron-builder --win --x64"
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "electron:prod": "cross-env NODE_ENV=production electron .",
+    "app:dev": "concurrently -k \"npm:dev\" \"npm:electron:dev\"",
+    "app:build": "npm run build && electron-builder --win --x64",
+    "dist": "npm run app:build"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -28,6 +32,8 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
     "electron": "^37.2.0",
     "electron-builder": "^26.0.12",
     "eslint": "^9.9.1",
@@ -51,7 +57,17 @@
       "electron.js",
       "preload.js",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "codegen_training/model/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "codegen_training/model",
+        "to": "codegen_training/model",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "directories": {
       "buildResources": "build"
